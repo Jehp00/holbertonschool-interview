@@ -16,7 +16,7 @@ def canUnlockAll(boxes):
                 keyList.append(0)
                 setKeys(boxes[i], keyList, boxesUnlock)
             if boxesUnlock[i] == 0 and keyList.count(i) > 0:
-                keyList = unLockBox(keyList, boxesUnlock, boxes)
+                keyList = unlockBox(keyList, boxesUnlock, boxes)
         else:
             return False
     if boxesUnlock.count(0) == 0:
