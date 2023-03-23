@@ -24,15 +24,15 @@ def canUnlockAll(boxes):
     return False
 
 
-def unLockBox(keys, boxesUnlock, boxes):
+def unlockBox(keys,boxesUnlock,boxes):
     keys_copy = []
-    if len(keys) > 0:
+    if len(keys) >0:
         if keys[0] < len(boxesUnlock):
             boxesUnlock[keys[0]] = 1
-            if not boxes[keys[0]] or type(boxes[keys[0]] == list):
-                setKeys(boxes[keys[0]], keys, boxesUnlock)
+            if not boxes[keys[0]] or ( type(boxes[keys[0]]) == list):
+                setKeys(boxes[keys[0]],keys,boxesUnlock)
             keys.pop(0)
-            unLockBox(keys, boxesUnlock, boxes)
+            unlockBox(keys,boxesUnlock,boxes)
     return keys
 
 
