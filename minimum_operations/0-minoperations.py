@@ -4,8 +4,7 @@
 
 def minOperations(n):
     """
-    :param n: Calculates the minimum number of operations to go from one 'H' to n 'H's
-    if the only available operations are "Copy All" and "Paste"
+    :param n: Calculates the minimum number of operations
     :return: int with the number of operations
     """
     if n <= 1:
