@@ -25,7 +25,7 @@ static void print_grid(int grid[3][3])
 }
 
 /**
- * sanpiles_sum - Add two sandpiles
+ * sandpiles_sum - Add two sandpiles
  * @grid1: First sandpile
  * @grid2: Second sandpile
  *
