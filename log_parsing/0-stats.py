@@ -1,9 +1,11 @@
 #!/usr/bin/python3
-"""module log parsing"""
+"""
+Reads stdin line by line and computes metrics
+"""
+
 from sys import stdin
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     total_size = 0
     status_codes = {}
     list_status_codes = [
