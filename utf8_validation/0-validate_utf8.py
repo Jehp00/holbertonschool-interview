@@ -33,6 +33,8 @@ def validUTF8(data):
             return False
 
         for i in range(index, index + number_of_ones - 1):
+            if data[i] > index:
+                return False
             number = data[i]
             number >>= (NUMBER_OF_BITS_PER_BLOCK - 1)
             if number != 1:
@@ -42,3 +44,10 @@ def validUTF8(data):
                 return False
             index += 1
     return True
+
+"""if __name__ == '__main__':
+    validUTF8 = __import__('0-validate_utf8').validUTF8
+
+    data = [235, 140]
+    print(validUTF8(data))
+"""
