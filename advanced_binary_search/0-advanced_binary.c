@@ -10,13 +10,13 @@
  */
 void print_array(int *array, int first, int last)
 {
-    int i;
+	int i;
 
-    printf("Searching in array: ");
-    for (i = first; i < last; i++)
-        printf("%d, ", array[i]);
-    
-    printf("%d", array[i]);
+	printf("Searching in array: ");
+	for (i = first; i < last; i++)
+		printf("%d, ", array[i]);
+
+	printf("%d", array[i]);
 	printf("\n");
 }
 
@@ -30,15 +30,15 @@ void print_array(int *array, int first, int last)
  */
 int advanced_binary(int *array, size_t size, int value)
 {
-    size_t first;
-    size_t last;
+	size_t first;
+	size_t last;
 
-    if (!array)
-        return -1;
-    
-    first = 0;
-    last = size - 1;
-    return (recursive_search(array, first, last, value));
+	if (!array)
+		return -1;
+
+	first = 0;
+	last = size - 1;
+	return (recursive_search(array, first, last, value));
 }
 
 /**
@@ -51,7 +51,7 @@ int advanced_binary(int *array, size_t size, int value)
  */
 int recursive_search(int *array, size_t first, size_t last, int value)
 {
-    size_t half;
+	size_t half;
 
 	if (first < last)
 	{
