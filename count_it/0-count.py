@@ -1,81 +1,66 @@
 #!/usr/bin/python3
 """
-0x13. Count it! - Write a recursive function that queries the Reddit API,
-                  parses the title of all hot articles, and prints a sorted
-                  count of given keywords (case-insensitive, delimited by
-                  spaces.
-                  Javascript should count as javascript, but java should not).
+Count it problem
 """
+import requests
 
 
-def count_words(subreddit, word_list, after=None, count={}):
+def count_words(subreddit, word_list, kw_cont={}, next_pg=None, reap_kw={}):
     """
-    Queries the Reddit API, parses titles of all hot articles,
-    and prints sorted count
-
-    parameters:
-        subreddit: subreddit to query for hot articles
-        word_list: list of keywords to count
-        after: indicates next starting point to get data after
-        count: dictionary of current count of keyword
+    *******************************************************
+    **** Recursive function that queries the Reddit API ***
+    ******* prints a sorted count of given keywords *******
+    *******************************************************
+    @subreddit: string representing subreddit to search for
+    @word_list: collection of keywords to search in the
+                subreddit
+    @kw_cont: a copy of counted words
+    @next_pg: next page
+    @reap_kw: a dict for the counted words
+    Return: Nothing
     """
-    import json
-    import requests
-    if after is None:
-        sub_URL = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
+    headers = {"User-Agent": "me"}
+
+    if next_pg:
+        subRhot = requests.get('https://reddit.com/r/' + subreddit +
+                               '/hot.json?after=' + next_pg,
+                               headers=headers)
     else:
-        sub_URL = 'https://www.reddit.com/r/{}/hot.json?after={}'.format(
-            subreddit, after)
-    subreddit_info = requests.get(sub_URL,
-                                  headers={"user-agent": "user"},
-                                  allow_redirects=False)
-    for word in word_list:
-        word = word.lower()
-        if word not in count.keys():
-            count[word] = 0
-    try:
-        data = subreddit_info.json().get("data")
-    except:
+        subRhot = requests.get('https://reddit.com/r/' + subreddit +
+                               '/hot.json', headers=headers)
+
+    if subRhot.status_code == 404:
         return
-    children = data.get("children")
-    for child in children:
-        title = (child.get("data").get("title").lower())
-        title = title.split(' ')
+
+    if kw_cont == {}:
         for word in word_list:
-            word = word.lower()
-            count[word] += title.count(word)
-    after = data.get("after")
-    if after is not None:
-        return count_words(subreddit, word_list, after, count)
-    result = []
-    for k in count.keys():
-        if count[k] != 0:
-            if result == []:
-                result.append("{}: {}".format(k, count[k]))
-            else:
-                for i in range(len(result)):
-                    if count[k] > int(result[i].split(' ')[1]):
-                        result = result[:i] + \
-                            ["{}: {}".format(k, count[k])] + \
-                            result[i:]
-                        break
-                    elif count[k] == int(result[i].split(' ')[1]):
-                        alpha_list = [k, result[i].split(' ')[0]]
-                        j = 1
-                        if (i + j) >= len(result):
-                            continue
-                        while count[k] == int(result[i + j].split(' ')[1]):
-                            alpha_list.append(result[i + j].split(' ')[0])
-                        alpha_list = alpha_list.sort
-                        for j in range(len(alpha_list)):
-                            if k == alpha_list[j]:
-                                result = result[:i + j] + \
-                                    ["{}: {}".format(k, count[k])] + \
-                                    result[i + j:]
-                    else:
-                        continue
-                else:
-                    result.append("{}: {}".format(k, count[k]))
-    if result != []:
-        for printing in result:
-            print(printing)
+            kw_cont[word] = 0
+            reap_kw[word] = word_list.count(word)
+
+    subRhot_dict = subRhot.json()
+    subRhot_data = subRhot_dict['data']
+    next_pg = subRhot_data['after']
+    subRhot_posts = subRhot_data['children']
+
+    for post in subRhot_posts:
+        post_data = post['data']
+        post_title = post_data['title']
+        title_words = post_title.split()
+        for w in title_words:
+            for key in kw_cont:
+                if w.lower() == key.lower():
+                    kw_cont[key] += 1
+
+    if next_pg:
+        count_words(subreddit, word_list, kw_cont, next_pg, reap_kw)
+
+    else:
+        for key, val in reap_kw.items():
+            if val > 1:
+                kw_cont[key] *= val
+
+        sorted_abc = sorted(kw_cont.items(), key=lambda x: x[0])
+        sorted_res = sorted(sorted_abc, key=lambda x: (-x[1], x[0]))
+        for res in sorted_res:
+            if res[1] > 0:
+                print('{}: {}'.format(res[0], res[1]))
