@@ -1,66 +1,51 @@
 #!/usr/bin/python3
-"""
-Count it problem
-"""
+"""Count It"""
 import requests
 
 
-def count_words(subreddit, word_list, kw_cont={}, next_pg=None, reap_kw={}):
+def count_words(subreddit, word_list, hot_list_titles=[], after='null'):
+    """ returns a list containing the titles
+    of all hot articles for a given subreddit.
     """
-    *******************************************************
-    **** Recursive function that queries the Reddit API ***
-    ******* prints a sorted count of given keywords *******
-    *******************************************************
-    @subreddit: string representing subreddit to search for
-    @word_list: collection of keywords to search in the
-                subreddit
-    @kw_cont: a copy of counted words
-    @next_pg: next page
-    @reap_kw: a dict for the counted words
-    Return: Nothing
-    """
-    headers = {"User-Agent": "me"}
+    base_url = 'https://www.reddit.com/r/'
+    url = base_url + subreddit + "/hot.json"
+    credentials = {
+        'User-Agent': "Mozilla/5.0 (X11; CrOS x86_64 10066.0.0) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/84.0.4147.105 Safari/537.36"}
+    parameters = {"limit": "100", "after": after}
+    response = requests.get(url,
+                            headers=credentials,
+                            params=parameters,
+                            allow_redirects=False)
+    if response.status_code != 200:
+        return None
 
-    if next_pg:
-        subRhot = requests.get('https://reddit.com/r/' + subreddit +
-                               '/hot.json?after=' + next_pg,
-                               headers=headers)
-    else:
-        subRhot = requests.get('https://reddit.com/r/' + subreddit +
-                               '/hot.json', headers=headers)
+    hot_list_of_dicts = response.json().get("data").get("children")
+    after = response.json().get("data").get("after")
+    """""to print the after string, which acts as a "pointer"
+    to the next response uncomment the following line"""
+    # print(after)
+    hot_list_titles.extend([reddit.get("data").get("title") for
+                            reddit in hot_list_of_dicts])
+    """to print the length of the hot_list_titles uncomment
+    the following line"""
+    # print(len(hot_list_titles))
 
-    if subRhot.status_code == 404:
-        return
-
-    if kw_cont == {}:
+    if after is None:
+        to_print_dict = {x: 0 for x in word_list}
         for word in word_list:
-            kw_cont[word] = 0
-            reap_kw[word] = word_list.count(word)
+            count = 0
+            for title in hot_list_titles:
+                split_title = title.split()
+                new_split = [element.lower() for element in split_title]
+                count = count + new_split.count(word.lower())
+            if count != 0:
+                to_print_dict[word] = to_print_dict[word] + count
 
-    subRhot_dict = subRhot.json()
-    subRhot_data = subRhot_dict['data']
-    next_pg = subRhot_data['after']
-    subRhot_posts = subRhot_data['children']
-
-    for post in subRhot_posts:
-        post_data = post['data']
-        post_title = post_data['title']
-        title_words = post_title.split()
-        for w in title_words:
-            for key in kw_cont:
-                if w.lower() == key.lower():
-                    kw_cont[key] += 1
-
-    if next_pg:
-        count_words(subreddit, word_list, kw_cont, next_pg, reap_kw)
-
+        for elem in sorted(to_print_dict.items(), key=lambda x: (-x[1], x[0])):
+            if elem[1] != 0:
+                print("{}: {}".format(elem[0], elem[1]))
     else:
-        for key, val in reap_kw.items():
-            if val > 1:
-                kw_cont[key] *= val
-
-        sorted_abc = sorted(kw_cont.items(), key=lambda x: x[0])
-        sorted_res = sorted(sorted_abc, key=lambda x: (-x[1], x[0]))
-        for res in sorted_res:
-            if res[1] > 0:
-                print('{}: {}'.format(res[0], res[1]))
+        return count_words(subreddit, word_list,
+                           hot_list_titles, after)
